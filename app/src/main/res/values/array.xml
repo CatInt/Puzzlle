@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="level_selector">
+        <item>Level 3x3</item>
+        <item>Level 4x4</item>
+        <item>Level 5x5</item>
+        <item>Level 6x6</item>
+    </array>
+</resources>

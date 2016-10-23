@@ -1,0 +1,49 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.Startup" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/accent</item>
+        <item name="colorAccent">@color/colorPrimaryLight</item>
+        <item name="android:windowBackground">@color/accent</item>
+    </style>
+
+    <style name="AppTheme.ActionBarOverflow" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="drawerArrowStyle">@style/AccentDrawerArrowStyle</item>
+
+    </style>
+
+    <style name="AccentDrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@color/md_white_1000</item>
+    </style>
+
+    <style name="CustomTitleAppearance" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">9sp</item>
+    </style>
+
+    <style name="NoBackgroundDialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@color/transparent</item>
+    </style>
+
+    <style name="TextAppearance.Record" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+</resources>

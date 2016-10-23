@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="colorPrimary">#FFEB3B</color>-->
+    <!--<color name="colorPrimaryDark">#FBC02D</color>-->
+    <!--<color name="colorAccent">#8BC34A</color>-->
+    <!--<color name="colorPrimaryLight">#FFF9C4</color>-->
+    <!--<color name="colorPrimaryBackground">#e9e3b3</color>-->
+
+    <color name="colorPrimary">#FBC02D</color>
+    <color name="colorPrimaryDark">#8BC34A</color>
+    <color name="colorAccent">#FFEB3B</color>
+    <color name="colorPrimaryLight">#FFF9C4</color>
+    <color name="colorPrimaryBackground">#e9e3b3</color>
+
+    <color name="colorCardText">#efb523</color>
+
+    <color name="colorAvatarRing">#428BC34A</color>
+
+    <color name="colorHint">#98fff9c4</color>
+    <color name="colorPiecesContainer">#48000000</color>
+    <color name="colorRecordContainer">#00000000</color>
+    <color name="colorRecordDivider">#64FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+</resources>

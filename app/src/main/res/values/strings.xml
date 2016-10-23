@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Puzzlle</string>
+    <string name="fab_scrolling_hide_view_behavior">com.whalespool.puzzlle.AutoHideFabBehavior</string>
+</resources>
