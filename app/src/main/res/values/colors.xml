@@ -22,4 +22,9 @@
     <color name="colorRecordDivider">#64FFFFFF</color>
     <color name="transparent">#00000000</color>
 
+    <color name="colorStateOnline">#DC8BC34A</color>
+    <color name="colorStateOffline">#36000000</color>
+    <color name="colorIconOnline">#8BC34A</color>
+    <color name="colorIconOffline">#c5ea8e</color>
+
 </resources>

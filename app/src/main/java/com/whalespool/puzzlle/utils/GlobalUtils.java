@@ -27,7 +27,7 @@ public class GlobalUtils {
      * @param total
      * @return
      */
-    public static int[] getRamdomList(int total){
+    public static int[] getRandomList(int total){
         int[] result = new int[total];
         for(int i = 0; i < total; i++){
             result[i] = i;

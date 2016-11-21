@@ -33,6 +33,7 @@
             android:id="@+id/dialog_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="80dp"
             android:layout_marginBottom="20dp"
             android:layout_marginTop="20dp"
             android:backgroundTint="@color/primary_dark"

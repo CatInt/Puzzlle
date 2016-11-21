@@ -2,6 +2,7 @@ package com.whalespool.puzzlle.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.whalespool.puzzlle.R;
+import com.whalespool.puzzlle.module.Player;
 import com.whalespool.puzzlle.module.Record;
 import com.whalespool.puzzlle.utils.DensityUtil;
 
@@ -33,13 +35,20 @@ public class SuccessDialogFragment extends DialogFragment implements View.OnClic
 
     AlertDialog mDialog;
     Record mRecord;
+    Player mCompetitor;
+    boolean mIsVictory;
 
     OnFragmentInteractionListener mListener;
-    ;
 
-    public static void show(FragmentManager fm, Record user) {
+    public static void show(FragmentManager fm, Record user){
+        show(fm, user, null, true);
+    }
+
+    public static void show(FragmentManager fm, Record user, Player competitor, boolean isVictory) {
         SuccessDialogFragment dialogFragment = new SuccessDialogFragment();
         Bundle argument = new Bundle();
+        argument.putParcelable("player", competitor);
+        argument.putBoolean("victory", isVictory);
         argument.putParcelable("record", user);
         dialogFragment.setArguments(argument);
         dialogFragment.show(fm, "success");
@@ -50,14 +59,15 @@ public class SuccessDialogFragment extends DialogFragment implements View.OnClic
         super.setArguments(args);
         if (args != null) {
             mRecord = args.getParcelable("record");
+            mIsVictory = args.getBoolean("victory");
+            mCompetitor = args.getParcelable("player");
         }
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
         return mDialog = new AlertDialog.Builder(getActivity(), R.style.NoBackgroundDialog)
-                .setView(getDialogViewFromRes())
+                .setView(mCompetitor != null? getCompeteDialogView() : getDialogViewFromRes())
                 .create();
     }
 
@@ -90,6 +100,22 @@ public class SuccessDialogFragment extends DialogFragment implements View.OnClic
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public View getCompeteDialogView(){
+        View view = LayoutInflater.from(new ContextThemeWrapper(getContext(), R.style.NoBackgroundDialog)).inflate(R.layout.dialog_succes, null);
+        String result;
+        Button btn = (Button) view.findViewById(R.id.dialog_button);
+        btn.setOnClickListener(this);
+        if (mIsVictory){
+            result = String.format("你以%s击败了%s", mRecord.getFinishTimeInFormat(),mCompetitor.name);
+        }else {
+            result = String.format("你被%s(%s)击败了", mCompetitor.name, mCompetitor.bestRecord.getFinishTimeInFormat());
+            btn.setText("可恶");
+            btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.md_red_600)));
+        }
+        ((TextView) view.findViewById(R.id.dialog_time)).setText(result);
+        return view;
     }
 
     public View getDialogViewFromRes() {
@@ -140,20 +166,22 @@ public class SuccessDialogFragment extends DialogFragment implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        mRecord.save(new SaveListener<String>() {
-            //In case the fragment already dismiss
-            Context context = getActivity();
+        if (mIsVictory){
+            mRecord.save(new SaveListener<String>() {
+                //In case the fragment already dismiss
+                Context context = getActivity();
 
-            @Override
-            public void done(String s, BmobException e) {
-                if (e != null) {
-                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-                } else {
-                    changeDrawerRecordList((OnFragmentInteractionListener) context, mRecord.getPicId());
-                    Toast.makeText(context, "上传成功", Toast.LENGTH_SHORT).show();
+                @Override
+                public void done(String s, BmobException e) {
+                    if (e != null) {
+                        Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        changeDrawerRecordList((OnFragmentInteractionListener) context, mRecord.getPicId());
+                        Toast.makeText(context, "上传成功", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
         dismiss();
     }
 

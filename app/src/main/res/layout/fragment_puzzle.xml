@@ -38,6 +38,16 @@
 
     </LinearLayout>
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/competitor"
+        android:layout_gravity="bottom|center"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:civ_border_color="@color/colorAvatarRing"
+        app:civ_border_width="2dp"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/back"
         android:layout_width="wrap_content"

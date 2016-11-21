@@ -30,6 +30,8 @@ import butterknife.OnClick;
  */
 public class HomeFragment extends Fragment implements DialogInterface.OnClickListener {
 
+    public final static String HOME_FRAGMENT = "home";
+
     public HomeFragment() {
         // Required empty public constructor
     }

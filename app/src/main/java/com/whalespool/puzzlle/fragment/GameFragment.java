@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.renderscript.Int2;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,12 +17,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
 import com.whalespool.puzzlle.PuzzlleApplication;
 import com.whalespool.puzzlle.R;
+import com.whalespool.puzzlle.event.CompetitionResultEvent;
 import com.whalespool.puzzlle.event.DishManagerInitFinishEvent;
 import com.whalespool.puzzlle.event.GameSuccessEvent;
 import com.whalespool.puzzlle.event.PieceMoveSuccessEvent;
 import com.whalespool.puzzlle.event.TimeEvent;
+import com.whalespool.puzzlle.module.Player;
 import com.whalespool.puzzlle.module.Record;
 import com.whalespool.puzzlle.module.User;
 import com.whalespool.puzzlle.puzzle.DraggableView;
@@ -41,11 +45,13 @@ import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.bmob.v3.datatype.BmobDate;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,6 +66,7 @@ public class GameFragment extends Fragment {
     private static final String ARG_TITLE = "param1";
     private static final String ARG_DRAWABLE = "param2";
     private static final String ARG_LEVEL = "param3";
+    private static final String ARG_PLAYER = "param4";
 
     private static final String TAG = "GameFragment";
 
@@ -68,6 +75,9 @@ public class GameFragment extends Fragment {
     private String mTitle;
     private int mDrawableRes;
     private int mLevel;
+    private Player mCompetitor;
+
+    private int mCompetitorTime = 0;
 
     private PuzzleManager mPuzzleManager;
     private GameTimer mTimer;
@@ -88,11 +98,16 @@ public class GameFragment extends Fragment {
      * @return A new instance of fragment GameFragment.
      */
     public static GameFragment newInstance(String title, int drawableRes, int level) {
+        return newInstance(title, drawableRes, level, null);
+    }
+
+    public static GameFragment newInstance(String title, int drawableRes, int level, Player mCompetitor) {
         GameFragment fragment = new GameFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TITLE, title);
         args.putInt(ARG_DRAWABLE, drawableRes);
         args.putInt(ARG_LEVEL, level);
+        args.putParcelable(ARG_PLAYER, mCompetitor);
         fragment.setArguments(args);
         return fragment;
     }
@@ -105,6 +120,7 @@ public class GameFragment extends Fragment {
             mTitle = getArguments().getString(ARG_TITLE);
             mDrawableRes = getArguments().getInt(ARG_DRAWABLE);
             mLevel = getArguments().getInt(ARG_LEVEL);
+            mCompetitor = getArguments().getParcelable(ARG_PLAYER);
         }
 
     }
@@ -113,6 +129,10 @@ public class GameFragment extends Fragment {
     ImageView mPuzzleBoard;
     @BindView(R.id.pieces_container)
     RecyclerView mPiecesRecycler;
+    @BindView(R.id.competitor)
+    CircleImageView mCompetitorAvatar;
+    @BindView(R.id.back)
+    FloatingActionButton mActionBtn;
 
     PiecesAdapter mPiecesAdapter;
 
@@ -123,7 +143,15 @@ public class GameFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_puzzle, container, false);
         ButterKnife.bind(this, root);
         EventBus.getDefault().register(this);
-
+        if (mCompetitor != null){
+            Glide.with(getContext())
+                    .fromResource()
+                    .load(mCompetitor.avatarRes)
+                    .into(mCompetitorAvatar);
+            mCompetitorAvatar.setVisibility(View.VISIBLE);
+            mActionBtn.setVisibility(View.GONE);
+            mCompetitorTime = (int) ((mLevel-2)*24  - (new Random()).nextFloat() * (4 + mLevel*2));
+        }
         initialization();
         return root;
     }
@@ -216,6 +244,9 @@ public class GameFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(TimeEvent event) {
         mTimeInMilli++;
+        if (mTimeInMilli > mCompetitorTime && mCompetitorTime != 0){
+            EventBus.getDefault().post(new CompetitionResultEvent(false));
+        }
 
         int min = mTimeInMilli / 60;
         int sec = mTimeInMilli % 60;
@@ -225,7 +256,35 @@ public class GameFragment extends Fragment {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(CompetitionResultEvent event){
+        mTimer.stopTimer();
+        //create record
+        Record record = new Record();
+        User user = PuzzlleApplication.PreferencesUtil.getCurrentUser();
+        record.setLevel(mLevel);
+        record.setFinishTime(mTimeInMilli);
+        record.setPicId(mTitle);
+        record.setCreateTime(new BmobDate(new Date()).toString());
+
+        if (event.isVictory){
+            record.setUsername(user.getUsername());
+            SuccessDialogFragment.show(getFragmentManager(),record,mCompetitor,true);
+        }else {
+            record.setUsername(mCompetitor.name);
+            mCompetitor.bestRecord = record;
+            SuccessDialogFragment.show(getFragmentManager(),record,mCompetitor,false);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(GameSuccessEvent event) {
+        if (mCompetitor != null){
+            mCompetitorTime = 0;
+            EventBus.getDefault().post(new CompetitionResultEvent(true));
+            return;
+        } else if (mCompetitorTime > 0) {
+            return;
+        }
         mTimer.stopTimer();
         //create record
         Record record = new Record();
@@ -266,7 +325,6 @@ public class GameFragment extends Fragment {
         Log.d(TAG, "DishManager init finish");
 
         try {
-
             // 裁剪算法优化基本完成，尚有几像素的偏差，可能是int到float强制转换的精度损失
             //mPuzzlePieces = ImageSplitter.split(bitmap, PuzzleApplication.getLevel(), DISH_WIDTH, DISH_HEIGHT);
 
@@ -298,7 +356,6 @@ public class GameFragment extends Fragment {
         EventBus.getDefault().post(new DishManagerInitFinishEvent());
     }
 
-
     public static class PiecesHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.piece)
@@ -315,7 +372,7 @@ public class GameFragment extends Fragment {
         int[] random;
 
         public PiecesAdapter() {
-            random = GlobalUtils.getRamdomList(mLevel * mLevel);
+            random = GlobalUtils.getRandomList(mLevel * mLevel);
         }
 
         @Override

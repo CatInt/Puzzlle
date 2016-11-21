@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Puzzlle</string>
     <string name="fab_scrolling_hide_view_behavior">com.whalespool.puzzlle.AutoHideFabBehavior</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
